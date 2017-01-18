@@ -11,17 +11,17 @@ class King : public Piece
 public:
     King(const char file, const int rank, std::string color);
 
-    virtual std::vector<Coordinate> getLegalMovesOnEmptyBoard();
+    virtual std::vector<Coordinate> getLegalMovesOnEmptyBoard(Piece *board[]) override;
 
-    virtual std::string getPieceCode();
+//    virtual std::string getPieceCode();
+//
+//    virtual std::string getPieceType();
 
-    virtual std::string getPieceType();
+    virtual ~King() override;
 
-    ~King();
-
-private:
-    std::string pieceCode = "\u265A";
-    std::string pieceType = "King";
+//private:
+//    std::string pieceCode = "\u265A";
+//    std::string pieceType = "King";
 };
 
 

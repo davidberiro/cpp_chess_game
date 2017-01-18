@@ -1,1 +1,1 @@
-g++ -std=c++11 -Wextra -Wall Board.cpp Coordinate.cpp Piece.cpp Knight.cpp King.cpp Queen.cpp Pawn.cpp Rook.cpp Bishop.cpp chess.cpp -o chess
+g++ -std=c++11 -Wextra -Wall Board.cpp GameRunner.cpp Coordinate.cpp Piece.cpp EmptyPiece.cpp Knight.cpp King.cpp Queen.cpp Pawn.cpp Rook.cpp Bishop.cpp chess.cpp -o chess

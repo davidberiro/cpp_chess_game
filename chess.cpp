@@ -1,11 +1,11 @@
 //
 // Created by davidberiro on 1/17/17.
 //
-#include "Board.h"
+#include "GameRunner.h"
 
 int main()
 {
-    Board *board = new Board();
-    board->printBoard();
+    GameRunner *game = new GameRunner();
+    game->startGame();
     return 0;
 }

@@ -11,17 +11,17 @@ class Pawn : public Piece
 public:
     Pawn(const char file, const int rank, std::string color);
 
-    virtual std::vector<Coordinate> getLegalMovesOnEmptyBoard();
+    virtual std::vector<Coordinate> getLegalMovesOnEmptyBoard(Piece *board[]) override;
 
-    virtual std::string getPieceCode();
+//    virtual std::string getPieceCode();
+//
+//    virtual std::string getPieceType();
 
-    virtual std::string getPieceType();
+    virtual ~Pawn() override ;
 
-    ~Pawn();
-
-private:
-    std::string pieceCode = "\u265F";
-    std::string pieceType = "Pawn";
+//private:
+//    std::string pieceCode = "\u265F";
+//    std::string pieceType = "Pawn";
 };
 
 #endif //EX2_PAWN_H

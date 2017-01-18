@@ -21,17 +21,26 @@ public:
 
     bool isInBoard(char x, int y);
 
-    std::string getColor();
+    std::string getColor() const;
 
-    //virtual std::vector<Coordinate> getLegalMovesOnEmptyBoard() = 0;
+    std::string getPieceColorCode();
 
-    ~Piece(){};
+    std::string getPieceCode();
+
+    int boardIndex(char x, int y);
+
+    int boardIndex(int x, int y);
+
+    virtual std::vector<Coordinate> getLegalMovesOnEmptyBoard(Piece *board[]) = 0;
+
+    virtual ~Piece();
 
 
-private:
+protected:
     Coordinate* location;
     std::string color;
     std::string pieceType;
+    std::string pieceCode;
 };
 
 #endif //EX2_CHESSPIECE_H

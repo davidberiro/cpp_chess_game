@@ -11,17 +11,16 @@ class Knight : public Piece
 public:
     Knight(const char file, const int rank, std::string color);
 
-    virtual std::vector<Coordinate> getLegalMovesOnEmptyBoard();
+    virtual std::vector<Coordinate> getLegalMovesOnEmptyBoard(Piece *board[]) override ;
 
-    virtual std::string getPieceCode();
+//    virtual std::string getPieceCode();
 
-    virtual std::string getPieceType();
+//    virtual std::string getPieceType();
 
-    ~Knight() ;
+    virtual ~Knight() override;
 
-private:
-    std::string pieceCode = "\u265E";
-    std::string pieceType = "Knight";
+//private:
+//    std::string pieceCode = "\u265E";
 };
 
 #endif //EX2_KNIGHT_H
