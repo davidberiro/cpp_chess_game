@@ -13,15 +13,14 @@ public:
 
     virtual std::vector<Coordinate> getLegalMovesOnEmptyBoard(Piece *board[]) override;
 
-//    virtual std::string getPieceCode();
-//
-//    virtual std::string getPieceType();
+    bool isMoved();
+
+    void movedRook();
 
     virtual ~Rook() override ;
 
-//private:
-//    std::string pieceCode = "\u265C";
-//    std::string pieceType = "Rook";
+private:
+    bool hasMoved;
 };
 
 #endif //EX2_ROOK_H

@@ -31,9 +31,12 @@ const std::string ESC_CODE_SUF = "\33[0m";
 const std::string SPACE = " ";
 
 
+/**
+ *
+ * @return
+ */
 Board::Board()
 {
-
     //creating rooks
     this->boardArray[this->indexInBoardArray(A_FILE, RANK_1)] = new Rook(A_FILE, RANK_1, WHITE);
     this->boardArray[this->indexInBoardArray(A_FILE, RANK_8)] = new Rook(A_FILE, RANK_8, BLACK);
@@ -74,6 +77,11 @@ Board::Board()
     }
 }
 
+/**
+ *
+ * @param board
+ * @return
+ */
 Board::Board(const Board &board)
 {
     Coordinate *currentCoordinate;
@@ -126,67 +134,165 @@ Board::Board(const Board &board)
     }
 }
 
+/**
+ *
+ * @param location
+ * @return
+ */
 int Board::indexInBoardArray(Coordinate location)
 {
     return (RANK_8 * (location.rank - 1)) + (int(location.file) % int(A_FILE));
 }
 
+/**
+ *
+ * @param x
+ * @param y
+ * @return
+ */
 int Board::indexInBoardArray(char x, int y)
 {
     return (RANK_8 * (y - 1)) + (int(x) % int(A_FILE));
 }
 
-//getPieceLocation(color) returns vector<Coordinates> of all pieces of that color
+/**
+ *
+ * @param userMove
+ * @param userColor
+ * @return
+ */
 int Board::makeMove(std::string userMove, std::string userColor)
 {
-//    std::cout << "at least i got here.. 1\n" <<std::flush;
+    std::string opponentColor = WHITE;
     char src_x = userMove.at(0);
     int src_y = int(userMove.at(1) - '0');
     char dest_x = userMove.at(2);
     int dest_y = int(userMove.at(3) - '0');
     bool isLocationLegal = false;
-    std::cout << src_x << src_y << dest_x <<dest_y <<std::flush;
+    std::vector<Coordinate> legalDestinations;
+    std::vector<Coordinate>::iterator it;
+    Piece *pieceToMove = this->boardArray[indexInBoardArray(src_x, src_y)];
+
+    if (userColor == WHITE)
+    {
+        opponentColor = BLACK;
+    }
 
     //check if user is trying to move something that isnt his..
-    if (this->boardArray[indexInBoardArray(src_x, src_y)]->getColor() != userColor)
+    if (pieceToMove->getColor() != userColor)
     {
         return 1;
     }
-//    std::cout << "at least i got here.. 2\n" <<std::flush;
-    std::vector<Coordinate> legalDestinations = this->boardArray[indexInBoardArray(src_x, src_y)]->getLegalMovesOnEmptyBoard(this->boardArray);
 
-    for (std::vector<Coordinate>::iterator it = legalDestinations.begin(); it != legalDestinations.end(); it++)
+    legalDestinations = pieceToMove->getLegalMovesOnEmptyBoard(this->boardArray);
+    for (it = legalDestinations.begin(); it != legalDestinations.end(); ++it)
     {
-//        std::cout << (*it).rank << (*it).file <<std::flush;
+        //std::cout << "legal move: " << (*it).file << (*it).rank << "\n" << std::flush;
         if ((*it).file == dest_x && (*it).rank == dest_y)
         {
             isLocationLegal = true;
         }
     }
     //if not in legal moves
-//    std::cout << "at least i got here.. 3\n" <<std::flush;
     if (!isLocationLegal)
     {
+        printWithColor("illegal move");
+        //std::cout<<"illegal move"<< "\n" <<std::flush;
         return 1;
     }
 
-//    std::cout << "at least i got here.. 4" <<std::flush;
     //if move leaves users king threatened
     Board tempBoard(*this);
     tempBoard.movePiece(Coordinate(src_x, src_y), Coordinate(dest_x, dest_y));
     if (tempBoard.isPieceThreatened(tempBoard.getKing(userColor)))
     {
+        printWithColor("illegal move");
         return 1;
     }
 
-//    std::cout << "at least i got here.. 5" <<std::flush;
-    this->movePiece(Coordinate(src_x, src_y), Coordinate(dest_x, dest_y));
-    return 0;
-    std::cout << "at least i got here.. 6" <<std::flush;
-    //TODO add more shit you retard
+    //now we have to check for castling..
+    if (pieceToMove->getType() == "King")
+    {
+        char newRookFile, oldRookFile;
+        int rookRank = src_y;
+        //in case of castling kingside
+        if (src_x + 2 == dest_x)
+        {
+            newRookFile = char(src_x + 1);
+            oldRookFile = char(src_x + 3);
+            tempBoard.movePiece(Coordinate(oldRookFile, rookRank), Coordinate(newRookFile, rookRank));
+            if (tempBoard.isPieceThreatened(tempBoard.boardArray[indexInBoardArray(newRookFile, rookRank)]))
+            {
+                printWithColor("illegal move");
+                return 1;
+            }
+            this->movePiece(Coordinate(oldRookFile, rookRank), Coordinate(newRookFile, rookRank));
+        }
+        else if (src_x - 2 == dest_x)
+        {
+            newRookFile = char(src_x - 1);
+            oldRookFile = char(src_x - 4);
+            tempBoard.movePiece(Coordinate(oldRookFile, rookRank), Coordinate(newRookFile, rookRank));
+            if (tempBoard.isPieceThreatened(tempBoard.boardArray[indexInBoardArray(newRookFile, rookRank)]))
+            {
+                printWithColor("illegal move");
+                return 1;
+            }
+            this->movePiece(Coordinate(oldRookFile, rookRank), Coordinate(newRookFile, rookRank));
+        }
+    }
 
+    this->movePiece(Coordinate(src_x, src_y), Coordinate(dest_x, dest_y));
+    //if opponents king is in check
+    if (isPieceThreatened(this->getKing(opponentColor)))
+    {
+        printWithColor("Check!");
+        if (isCheckMate(this->getKing(opponentColor)))
+        {
+            return 2;
+        }
+    }
+    return 0;
 }
 
+/**
+ *
+ * @param king
+ * @return
+ */
+bool Board::isCheckMate(Piece* king)
+{
+    std::vector<Coordinate> legalMoves;
+    std::string kingColor = king->getColor();
+    std::vector<Coordinate>::iterator it;
+    Coordinate *src;
+    for (int i = 0; i < BOARD_SIZE; i++)
+    {
+        if (this->boardArray[i]->getColor() != kingColor)
+        {
+            continue;
+        }
+        src = this->boardArray[i]->getLocation();
+        legalMoves = this->boardArray[i]->getLegalMovesOnEmptyBoard(this->boardArray);
+        for (it = legalMoves.begin(); it != legalMoves.end(); ++it)
+        {
+            Board tempBoard = Board(*this);
+            tempBoard.movePiece(Coordinate(src->file, src->rank), *it);
+            if (!tempBoard.isPieceThreatened(tempBoard.getKing(kingColor)))
+            {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
+/**
+ *
+ * @param myVector
+ * @param myCoordinate
+ * @return
+ */
 bool Board::isInVector(std::vector<Coordinate> myVector, Coordinate *myCoordinate)
 {
     for (std::vector<Coordinate>::iterator it = myVector.begin(); it != myVector.end(); it++)
@@ -199,17 +305,42 @@ bool Board::isInVector(std::vector<Coordinate> myVector, Coordinate *myCoordinat
     return false;
 }
 
+/**
+ *
+ * @param location
+ * @param destination
+ */
 void Board::movePiece(Coordinate location, Coordinate destination)
 {
     int destinationIndex = indexInBoardArray(destination);
     int locationIndex = indexInBoardArray(location);
     delete this->boardArray[destinationIndex];
     this->boardArray[destinationIndex] = nullptr;
+    std::string pieceType = this->boardArray[locationIndex]->getType();
+    //checking if pawn reaches 1st/8th rank to promote to queen
+    if (pieceType == "Pawn")
+    {
+        if (destination.rank == RANK_8 || destination.rank == RANK_1)
+        {
+            std::string pawnColor = this->boardArray[locationIndex]->getColor();
+            char file = destination.file;
+            int rank = destination.rank;
+            this->boardArray[destinationIndex] = new Queen(file, rank, pawnColor);
+            this->boardArray[locationIndex] = new EmptyPiece(location.file, location.rank);
+            return;
+        }
+    }
     this->boardArray[destinationIndex] = this->boardArray[locationIndex];
+    this->boardArray[destinationIndex]->setLocation(new Coordinate(destination.file, destination.rank));
     this->boardArray[locationIndex] = new EmptyPiece(location.file, location.rank);
     return;
 }
 
+/**
+ *
+ * @param defender
+ * @return
+ */
 bool Board::isPieceThreatened(Piece *defender)
 {
     std::string opponentsColor = WHITE;
@@ -297,6 +428,7 @@ void Board::printBoard()
             }
         }
     }
+    std::cout << std::endl << std::endl;
 }
 
 void Board::printBoardLocation(const char file, const int rank, std::string backGroundColor)
@@ -322,13 +454,18 @@ std::vector<Coordinate> Board::getPieceLocations(std::string color)
     return result;
 }
 
+void Board::printWithColor(std::string message)
+{
+    std::cout << "\33[37;41m" << message << "\33[0m\n";
+}
+
 
 Board::~Board()
 {
     for (int i = 0; i < BOARD_SIZE; i++)
     {
         delete (this->boardArray[i]);
-        //this->boardArray[i] = nullptr;
+        this->boardArray[i] = nullptr;
     }
 }
 

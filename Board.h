@@ -45,6 +45,9 @@ public:
 
     void movePiece(Coordinate location, Coordinate destination);
 
+    void printWithColor(std::string message);
+
+    bool isCheckMate(Piece *king);
 
     ~Board();
 

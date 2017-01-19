@@ -8,6 +8,7 @@ Rook::Rook(const char file, const int rank, std::string color) : Piece(file, ran
 {
     this->pieceType = "Rook";
     this->pieceCode = "\u265C";
+    this->hasMoved = false;
 }
 
 std::vector<Coordinate> Rook::getLegalMovesOnEmptyBoard(Piece *board[])
@@ -38,7 +39,6 @@ std::vector<Coordinate> Rook::getLegalMovesOnEmptyBoard(Piece *board[])
                     result.push_back(Coordinate(char(x - i), y));
                 }
             }
-
         }
         if (this->isInBoard(x + i, y) && !(collided_right))
         {
@@ -93,15 +93,15 @@ std::vector<Coordinate> Rook::getLegalMovesOnEmptyBoard(Piece *board[])
     return result;
 }
 
-//std::string Rook::getPieceCode()
-//{
-//    return this->pieceCode;
-//}
-//
-//std::string Rook::getPieceType()
-//{
-//    return this->pieceType;
-//}
+bool Rook::isMoved()
+{
+    return this->hasMoved;
+}
+
+void Rook::movedRook()
+{
+    this->hasMoved = true;
+}
 
 Rook::~Rook()
 {
